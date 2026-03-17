@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>麦克风测试</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', Arial, sans-serif;
+      margin: 0;
+      padding: 25px;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h2 { color: #58A352; margin-bottom: 20px; }
+    .mic-selector {
+      width: 100%;
+      max-width: 350px;
+      margin-bottom: 20px;
+    }
+    .mic-selector label {
+      display: block;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    .mic-selector select {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+    .mic-selector select:hover {
+      border-color: #4CAF50;
+    }
+    .mic-selector select:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+    .status { font-size: 14px; color: #666; margin-bottom: 15px; }
+    .status.active { color: #4CAF50; }
+    .status.error { color: #f44336; }
+    .meter-container {
+      width: 100%;
+      max-width: 350px;
+      height: 30px;
+      background: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .meter-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 15px;
+      transition: width 0.05s ease, background 0.1s ease;
+      background: #4CAF50;
+    }
+    .volume-text {
+      font-size: 36px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 15px;
+    }
+    .bars-container {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 100px;
+      width: 100%;
+      max-width: 350px;
+      margin-bottom: 20px;
+    }
+    .bar {
+      flex: 1;
+      background: #4CAF50;
+      border-radius: 2px 2px 0 0;
+      min-height: 2px;
+      transition: height 0.08s ease;
+    }
+    .tip { font-size: 12px; color: #999; }
+    .save-tip {
+      font-size: 12px;
+      color: #4CAF50;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #f1f8f4;
+      border-radius: 5px;
+      border-left: 3px solid #4CAF50;
+    }
+  </style>
+</head>
+<body>
+  <h2>麦克风测试</h2>
+  <div class="mic-selector">
+    <label for="micSelect">选择麦克风：</label>
+    <select id="micSelect">
+      <option value="">正在加载麦克风列表...</option>
+    </select>
+  </div>
+  <div class="status" id="status">请选择麦克风设备</div>
+  <div class="volume-text" id="volumeText">0%</div>
+  <div class="meter-container">
+    <div class="meter-bar" id="meterBar"></div>
+  </div>
+  <div class="bars-container" id="barsContainer"></div>
+  <div class="tip">对着麦克风说话，观察音量变化</div>
+  <div class="save-tip">✓ 选择的麦克风将用于录制视频</div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const meterBar = document.getElementById('meterBar');
+    const volumeText = document.getElementById('volumeText');
+    const barsContainer = document.getElementById('barsContainer');
+    const micSelect = document.getElementById('micSelect');
+
+    const BAR_COUNT = 40;
+    for (let i = 0; i < BAR_COUNT; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      barsContainer.appendChild(bar);
+    }
+    const bars = barsContainer.querySelectorAll('.bar');
+
+    let currentStream = null;
+    let audioCtx = null;
+    let animationId = null;
+
+    // 获取所有麦克风设备
+    async function loadMicrophones() {
+      try {
+        // 先请求权限
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        // 获取设备列表
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = devices.filter(device => device.kind === 'audioinput');
+
+        micSelect.innerHTML = '';
+
+        if (audioInputs.length === 0) {
+          micSelect.innerHTML = '<option value="">未检测到麦克风</option>';
+          statusEl.textContent = '未检测到麦克风设备';
+          statusEl.className = 'status error';
+          return;
+        }
+
+        audioInputs.forEach((device, index) => {
+          const option = document.createElement('option');
+          option.value = device.deviceId;
+          option.textContent = device.label || `麦克风 ${index + 1}`;
+          micSelect.appendChild(option);
+        });
+
+        // 尝试恢复之前选择的麦克风
+        const savedMicId = localStorage.getItem('selectedMicrophoneId');
+        let selectedDeviceId = audioInputs[0].deviceId;
+
+        if (savedMicId) {
+          // 检查保存的麦克风是否还存在
+          const savedDevice = audioInputs.find(d => d.deviceId === savedMicId);
+          if (savedDevice) {
+            selectedDeviceId = savedMicId;
+            micSelect.value = savedMicId;
+          }
+        }
+
+        // 启动选中的麦克风测试
+        startMicTest(selectedDeviceId);
+        // 保存当前选择
+        localStorage.setItem('selectedMicrophoneId', selectedDeviceId);
+      } catch (err) {
+        console.error('获取麦克风列表失败:', err);
+        micSelect.innerHTML = '<option value="">无法获取麦克风列表</option>';
+        statusEl.textContent = '无法访问麦克风: ' + err.message;
+        statusEl.className = 'status error';
+      }
+    }
+
+    // 麦克风切换事件
+    micSelect.addEventListener('change', (e) => {
+      const deviceId = e.target.value;
+      if (deviceId) {
+        // 保存选择的麦克风ID到localStorage
+        localStorage.setItem('selectedMicrophoneId', deviceId);
+        console.log('已保存麦克风设备:', deviceId);
+        startMicTest(deviceId);
+      }
+    });
+
+    async function startMicTest(deviceId) {
+      try {
+        // 停止之前的流
+        if (currentStream) {
+          currentStream.getTracks().forEach(track => track.stop());
+        }
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+
+        // 获取指定麦克风的流
+        const constraints = {
+          audio: {
+            deviceId: deviceId ? { exact: deviceId } : undefined
+          }
+        };
+
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        statusEl.textContent = '麦克风已连接，请说话...';
+        statusEl.className = 'status active';
+
+        if (!audioCtx) {
+          audioCtx = new AudioContext();
+        }
+
+        const source = audioCtx.createMediaStreamSource(currentStream);
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        function update() {
+          analyser.getByteFrequencyData(dataArray);
+
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+          }
+          const avg = sum / dataArray.length;
+          const percent = Math.min(100, Math.round((avg / 128) * 100));
+
+          volumeText.textContent = percent + '%';
+          meterBar.style.width = percent + '%';
+
+          if (percent < 30) {
+            meterBar.style.background = '#4CAF50';
+          } else if (percent < 70) {
+            meterBar.style.background = '#FF9800';
+          } else {
+            meterBar.style.background = '#f44336';
+          }
+
+          for (let i = 0; i < bars.length; i++) {
+            const idx = Math.floor(i * dataArray.length / bars.length);
+            const val = dataArray[idx];
+            const h = Math.max(2, (val / 255) * 100);
+            bars[i].style.height = h + 'px';
+            if (val < 80) bars[i].style.background = '#4CAF50';
+            else if (val < 180) bars[i].style.background = '#FF9800';
+            else bars[i].style.background = '#f44336';
+          }
+
+          animationId = requestAnimationFrame(update);
+        }
+        update();
+      } catch (err) {
+        statusEl.textContent = '无法访问麦克风: ' + err.message;
+        statusEl.className = 'status error';
+      }
+    }
+
+    // 页面加载时获取麦克风列表
+    loadMicrophones();
+
+    // 窗口关闭时清理资源
+    window.addEventListener('beforeunload', () => {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+      if (audioCtx) {
+        audioCtx.close();
+      }
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    });
+  </script>
+</body>
+</html>
