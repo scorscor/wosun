@@ -50,20 +50,14 @@ docker-compose up -d
 ### 3. 配置Nginx反向代理
 
 ```bash
-# 安装Nginx
-sudo apt-get install nginx
-
-# 复制配置文件
-sudo cp nginx.conf /etc/nginx/sites-available/wosun-website
-
-# 创建软链接
-sudo ln -s /etc/nginx/sites-available/wosun-website /etc/nginx/sites-enabled/
+# 复制配置文件到vhost目录
+cp wosun.scor.vip.conf /usr/local/nginx/conf/vhost/
 
 # 测试配置
-sudo nginx -t
+/usr/local/nginx/sbin/nginx -t
 
 # 重启Nginx
-sudo systemctl restart nginx
+/usr/local/nginx/sbin/nginx -s reload
 ```
 
 ### 4. 配置HTTPS（可选）
