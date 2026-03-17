@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  wosun-website:
+    build: .
+    container_name: wosun-website
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000

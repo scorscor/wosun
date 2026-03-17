@@ -3,3 +3,5 @@ data/
 *.log
 .DS_Store
 .env
+wosun-website-deploy.zip
+wosun-website-deploy.tar.gz
