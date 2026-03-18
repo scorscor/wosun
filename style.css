@@ -341,130 +341,161 @@ body {
   color: #4CAF50;
 }
 
-/* 下载弹窗样式 */
-.dl-popup {
+/* 下载弹框样式 */
+.modal-overlay {
   display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 9999;
-}
-
-.dl-popup.show {
-  display: flex;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
   justify-content: center;
   align-items: center;
 }
 
-.dl-popup-box {
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-content {
   background: white;
-  border-radius: 12px;
+  border-radius: 15px;
   padding: 30px;
-  max-width: 480px;
+  max-width: 500px;
   width: 90%;
   position: relative;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
 }
 
-.dl-close {
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-close {
   position: absolute;
-  top: 12px;
-  right: 18px;
-  font-size: 28px;
+  top: 15px;
+  right: 20px;
+  font-size: 30px;
   color: #999;
   cursor: pointer;
-  line-height: 1;
+  transition: color 0.3s;
 }
 
-.dl-close:hover {
+.modal-close:hover {
   color: #333;
 }
 
-.dl-title {
+.modal-title {
   text-align: center;
-  font-size: 22px;
+  font-size: 24px;
   color: #333;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
-.dl-content {
+.modal-body {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.dl-code-box {
+.modal-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.extract-code {
   background: #e8f5e9;
-  padding: 15px;
+  padding: 15px 20px;
   border-radius: 8px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.dl-code-label {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 8px;
+.extract-code-label {
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
 }
 
-.dl-code-value {
-  font-size: 24px;
+.extract-code-value {
+  font-size: 20px;
   color: #4CAF50;
   font-weight: bold;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
+  background: white;
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: 2px dashed #4CAF50;
 }
 
-.dl-link-btn {
+.download-btn {
   display: block;
-  padding: 14px;
+  width: 100%;
+  padding: 15px;
   background: #4CAF50;
   color: white;
   text-align: center;
   text-decoration: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 10px;
+  font-size: 18px;
   font-weight: bold;
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
 }
 
-.dl-link-btn:hover {
+.download-btn:hover {
   background: #45a049;
+  transform: translateY(-2px);
 }
 
-.dl-option {
+.modal-option-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
+  gap: 15px;
+  padding: 20px;
   background: #f5f5f5;
-  border-radius: 8px;
+  border-radius: 10px;
   text-decoration: none;
+  transition: all 0.3s;
   border: 2px solid transparent;
 }
 
-.dl-option:hover {
+.modal-option-btn:hover {
   background: #e8f5e9;
   border-color: #4CAF50;
+  transform: translateX(5px);
 }
 
-.dl-option-icon {
-  font-size: 36px;
+.option-icon {
+  font-size: 40px;
 }
 
-.dl-option-text {
+.option-text {
   flex: 1;
 }
 
-.dl-option-name {
-  font-size: 16px;
+.option-name {
+  font-size: 18px;
   font-weight: bold;
   color: #333;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
-.dl-option-desc {
-  font-size: 13px;
+.option-desc {
+  font-size: 14px;
   color: #666;
 }
 
