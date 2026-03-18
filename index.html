@@ -86,12 +86,23 @@
       <h2>立即下载</h2>
       <p class="download-subtitle">终身免费使用，无任何限制</p>
       <div class="download-buttons">
-        <a href="#" class="btn-download">Windows 版本</a>
-        <a href="#" class="btn-download">Mac 版本</a>
+        <a href="#" class="btn-download" data-platform="windows">Windows 版本</a>
+        <a href="#" class="btn-download" data-platform="mac">Mac 版本</a>
       </div>
       <p class="version-info">当前版本：v1.0.0 | 更新时间：2026-03-16</p>
     </div>
   </section>
+
+  <!-- 下载弹框 -->
+  <div id="downloadModal" class="modal-overlay">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <h3 class="modal-title" id="modalTitle">下载</h3>
+      <div class="modal-body" id="modalBody">
+        <!-- 动态内容 -->
+      </div>
+    </div>
+  </div>
 
   <!-- 用户留言 -->
   <section id="feedback" class="feedback">

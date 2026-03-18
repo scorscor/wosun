@@ -116,3 +116,105 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 // 页面加载时获取留言数量
 loadMessageCount();
+
+// 下载弹框逻辑
+const downloadModal = document.getElementById('downloadModal');
+const modalClose = document.querySelector('.modal-close');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+const windowsBtn = document.querySelector('.btn-download[data-platform="windows"]');
+const macBtn = document.querySelector('.btn-download[data-platform="mac"]');
+
+// 下载链接配置
+const DOWNLOAD_CONFIG = {
+  windows: {
+    url: 'https://pan.baidu.com/s/1c9A83QpTu1o-JZ6ePENvjQ',
+    code: 'scor',
+    title: 'Windows 版本下载'
+  },
+  macNew: {
+    url: 'https://pan.baidu.com/s/1RLByPLnOOfG5u-wMN8CQlw',
+    code: 'scor',
+    title: '新款 Mac 下载',
+    desc: '适用于较新款的 Mac 系统'
+  },
+  macOld: {
+    url: 'https://pan.baidu.com/s/1zRG7Az9xBovzdsIL30VfLA',
+    code: 'scor',
+    title: '老款 Mac 下载',
+    desc: '适用于较老款的 Mac 系统'
+  }
+};
+
+// 显示 Windows 下载弹框
+function showWindowsModal() {
+  const config = DOWNLOAD_CONFIG.windows;
+  modalTitle.textContent = config.title;
+  modalBody.innerHTML = `
+    <div class="extract-code">
+      <span class="extract-code-label">提取码：</span>
+      <span class="extract-code-value">${config.code}</span>
+    </div>
+    <a href="${config.url}" target="_blank" class="download-btn">前往百度网盘下载</a>
+  `;
+  downloadModal.classList.add('active');
+}
+
+// 显示 Mac 版本选择弹框
+function showMacModal() {
+  modalTitle.textContent = '选择 Mac 版本';
+  modalBody.innerHTML = `
+    <div class="extract-code" style="margin-bottom: 20px;">
+      <span class="extract-code-label">提取码：</span>
+      <span class="extract-code-value">scor</span>
+    </div>
+    <div class="modal-options">
+      <a href="${DOWNLOAD_CONFIG.macNew.url}" target="_blank" class="modal-option-btn">
+        <div class="option-icon">💻</div>
+        <div class="option-text">
+          <div class="option-name">新款 Mac</div>
+          <div class="option-desc">适用于较新款的 Mac 系统</div>
+        </div>
+      </a>
+      <a href="${DOWNLOAD_CONFIG.macOld.url}" target="_blank" class="modal-option-btn">
+        <div class="option-icon">🖥️</div>
+        <div class="option-text">
+          <div class="option-name">老款 Mac</div>
+          <div class="option-desc">适用于较老款的 Mac 系统</div>
+        </div>
+      </a>
+    </div>
+  `;
+  downloadModal.classList.add('active');
+}
+
+// 点击 Windows 版本按钮
+windowsBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  showWindowsModal();
+});
+
+// 点击 Mac 版本按钮，弹出选择弹框
+macBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  showMacModal();
+});
+
+// 点击关闭按钮
+modalClose.addEventListener('click', () => {
+  downloadModal.classList.remove('active');
+});
+
+// 点击弹框外部关闭
+downloadModal.addEventListener('click', (e) => {
+  if (e.target === downloadModal) {
+    downloadModal.classList.remove('active');
+  }
+});
+
+// ESC 键关闭弹框
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && downloadModal.classList.contains('active')) {
+    downloadModal.classList.remove('active');
+  }
+});
