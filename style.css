@@ -326,6 +326,21 @@ body {
   opacity: 0.8;
 }
 
+.icp-info {
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.icp-info a {
+  color: #ccc;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.icp-info a:hover {
+  color: #4CAF50;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .nav-links {
