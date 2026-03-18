@@ -109,12 +109,16 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       return;
     }
     e.preventDefault();
-    const target = document.querySelector(href);
-    if (target) {
-      target.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
+    try {
+      const target = document.querySelector(href);
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    } catch (error) {
+      console.error('Invalid selector:', href);
     }
   });
 });
@@ -122,11 +126,11 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // 页面加载时获取留言数量
 loadMessageCount();
 
-// 下载弹框逻辑 - 确保 DOM 加载完成后执行
-document.addEventListener('DOMContentLoaded', function() {
+// 下载弹框逻辑
+function initDownloadModal() {
   const downloadModal = document.getElementById('downloadModal');
   if (!downloadModal) return;
-  
+
   const modalClose = document.querySelector('.modal-close');
   const modalTitle = document.getElementById('modalTitle');
   const modalBody = document.getElementById('modalBody');
@@ -197,21 +201,27 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // 点击 Windows 版本按钮
-  windowsBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    showWindowsModal();
-  });
+  if (windowsBtn) {
+    windowsBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showWindowsModal();
+    });
+  }
 
   // 点击 Mac 版本按钮，弹出选择弹框
-  macBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    showMacModal();
-  });
+  if (macBtn) {
+    macBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showMacModal();
+    });
+  }
 
   // 点击关闭按钮
-  modalClose.addEventListener('click', () => {
-    downloadModal.classList.remove('active');
-  });
+  if (modalClose) {
+    modalClose.addEventListener('click', () => {
+      downloadModal.classList.remove('active');
+    });
+  }
 
   // 点击弹框外部关闭
   downloadModal.addEventListener('click', (e) => {
@@ -226,4 +236,11 @@ document.addEventListener('DOMContentLoaded', function() {
       downloadModal.classList.remove('active');
     }
   });
-});
+}
+
+// 初始化下载弹框
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDownloadModal);
+} else {
+  initDownloadModal();
+}
