@@ -100,14 +100,12 @@ async function loadMessageCount() {
   }
 }
 
-// 平滑滚动
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+// 平滑滚动 - 只处理有效的锚点链接
+document.querySelectorAll('a[href^="#"]:not([href="#"])').forEach(anchor => {
   anchor.addEventListener('click', function (e) {
     const href = this.getAttribute('href');
-    // 跳过 # 开头的空链接
-    if (href === '#' || !href) {
-      return;
-    }
+    if (!href || href.length <= 1) return;
+
     e.preventDefault();
     try {
       const target = document.querySelector(href);
