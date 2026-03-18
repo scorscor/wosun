@@ -1,60 +1,40 @@
 #!/bin/bash
 
-# 莴笋录屏官网部署脚本
+# 莴笋录屏网站 Docker 部署脚本
 
-echo "开始部署莴笋录屏官网..."
+echo "=========================================="
+echo "开始部署莴笋录屏网站"
+echo "=========================================="
 
-# 1. 更新系统包
-echo "1. 更新系统包..."
-sudo apt-get update
+# 停止并删除旧容器
+echo "1. 停止并删除旧容器..."
+docker compose down
 
-# 2. 安装Node.js (如果未安装)
-if ! command -v node &> /dev/null; then
-    echo "2. 安装Node.js..."
-    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-else
-    echo "2. Node.js已安装，跳过..."
-fi
+# 删除旧镜像（可选，节省空间）
+echo "2. 删除旧镜像..."
+docker rmi wosun-website-wosun-website 2>/dev/null || echo "没有找到旧镜像，跳过删除"
 
-# 3. 安装PM2 (如果未安装)
-if ! command -v pm2 &> /dev/null; then
-    echo "3. 安装PM2..."
-    sudo npm install -g pm2
-else
-    echo "3. PM2已安装，跳过..."
-fi
+# 重新构建镜像
+echo "3. 重新构建 Docker 镜像..."
+docker compose build --no-cache
 
-# 4. 进入项目目录
-cd /var/www/wosun-website || exit
+# 启动容器
+echo "4. 启动容器..."
+docker compose up -d
 
-# 5. 安装依赖
-echo "4. 安装项目依赖..."
-npm install --production
+# 等待容器启动
+echo "5. 等待容器启动..."
+sleep 3
 
-# 6. 创建数据目录
-echo "5. 创建数据目录..."
-mkdir -p data
+# 检查容器状态
+echo "6. 检查容器状态..."
+docker compose ps
 
-# 7. 停止旧进程
-echo "6. 停止旧进程..."
-pm2 stop wosun-website 2>/dev/null || true
-pm2 delete wosun-website 2>/dev/null || true
+# 查看容器日志
+echo "7. 查看最近的日志..."
+docker compose logs --tail=20
 
-# 8. 启动应用
-echo "7. 启动应用..."
-pm2 start server.js --name wosun-website
-
-# 9. 设置开机自启
-echo "8. 设置开机自启..."
-pm2 startup
-pm2 save
-
-# 10. 显示状态
-echo "9. 部署完成！"
-pm2 status
-
-echo ""
-echo "访问地址: http://your-server-ip:3000"
-echo "查看日志: pm2 logs wosun-website"
-echo "重启应用: pm2 restart wosun-website"
+echo "=========================================="
+echo "部署完成！"
+echo "网站地址: http://localhost:3000"
+echo "=========================================="
